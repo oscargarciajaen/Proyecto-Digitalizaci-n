@@ -10,20 +10,32 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 import random
 
-entradas = {}  # Diccionario global para almacenar las entradas de la interfaz
-
+# Diccionario global para almacenar las entradas de la interfaz
+entradas = {}
 
 def crearEstructura():
-    """Crea la estructura de carpetas y archivos si no existen."""
+    """
+    Crea la estructura de carpetas y archivos si no existen.
+
+    Esta función crea las carpetas necesarias para almacenar los datos y los archivos de salida.
+    Si no existe el archivo "output/reporte_empresa.pdf", también lo crea.
+    """
     estructura = ["data", "output"]
     for carpeta in estructura:
         os.makedirs(carpeta, exist_ok=True)
     if not os.path.exists("output/reporte_empresa.pdf"):
         open("output/reporte_empresa.pdf", "w").close()
 
-
 def calcularImpacto(datos):
-    """Calcula la huella de carbono de una empresa con fórmulas más precisas."""
+    """
+    Calcula la huella de carbono de una empresa con fórmulas más precisas.
+
+    Args:
+        datos (dict): Diccionario con los datos de la empresa, como consumo energético, agua, residuos, etc.
+
+    Returns:
+        dict: Diccionario con el impacto ambiental calculado para cada categoría y el total.
+    """
     factores = {
         "energia": 0.4,
         "agua": 0.25,
@@ -50,9 +62,17 @@ def calcularImpacto(datos):
     impacto["total"] = sum(impacto.values())
     return impacto
 
-
 def generarSugerencias(datos, impacto):
-    """Genera sugerencias personalizadas basadas en los datos del usuario."""
+    """
+    Genera sugerencias personalizadas basadas en los datos del usuario.
+
+    Args:
+        datos (dict): Datos ingresados por el usuario.
+        impacto (dict): Resultados del impacto ambiental calculado.
+
+    Returns:
+        list: Lista con sugerencias para reducir el impacto ambiental.
+    """
     sugerencias = []
     if datos["energia"] > 50000:
         sugerencias.append("Reducir el consumo de energía implementando eficiencia energética y fuentes renovables.")
@@ -65,15 +85,19 @@ def generarSugerencias(datos, impacto):
     if datos["materiales"] > 50000:
         sugerencias.append("Revisar la cadena de suministro para utilizar materiales reciclados o biodegradables.")
     if datos["transporte"] > 200000:
-        sugerencias.append(
-            f"Optimizar la logística y considerar transporte {datos['tipo_transporte']} con menor impacto.")
+        sugerencias.append(f"Optimizar la logística y considerar transporte {datos['tipo_transporte']} con menor impacto.")
     if not sugerencias:
         sugerencias.append("Se recomienda una auditoría ambiental para identificar oportunidades de mejora.")
     return sugerencias
 
-
 def generarGrafico(datos, impacto):
-    """Genera un gráfico del impacto ambiental y lo guarda como imagen."""
+    """
+    Genera un gráfico del impacto ambiental y lo guarda como imagen.
+
+    Args:
+        datos (dict): Datos de la empresa.
+        impacto (dict): Resultados del impacto ambiental calculado.
+    """
     categorias = list(impacto.keys())[:-1]
     valores = [impacto[c] for c in categorias]
 
@@ -85,9 +109,15 @@ def generarGrafico(datos, impacto):
     plt.savefig("output/grafico_impacto.png")
     plt.close()
 
-
 def generarReportePDF(datos, impacto, sugerencias):
-    """Genera un reporte en PDF con los resultados, gráfico y recomendaciones."""
+    """
+    Genera un reporte en PDF con los resultados, gráfico y recomendaciones.
+
+    Args:
+        datos (dict): Datos de la empresa.
+        impacto (dict): Resultados del impacto ambiental calculado.
+        sugerencias (list): Sugerencias para reducir el impacto ambiental.
+    """
     ruta_pdf = "output/reporte_empresa.pdf"
     doc = SimpleDocTemplate(ruta_pdf, pagesize=letter)
     styles = getSampleStyleSheet()
@@ -121,8 +151,12 @@ def generarReportePDF(datos, impacto, sugerencias):
     elementos.append(Image("output/grafico_impacto.png", width=400, height=300))
     doc.build(elementos)
 
-
 def calcular():
+    """
+    Función que gestiona el cálculo del impacto ambiental al recibir los datos desde la interfaz gráfica.
+
+    Toma los datos de la interfaz, calcula el impacto, genera sugerencias, grafica el impacto y crea el reporte PDF.
+    """
     datos = {
         campo: float(entradas[campo].get()) if campo != "nombre_empresa" and campo != "tipo_transporte" else entradas[
             campo].get() for campo in entradas}
@@ -132,9 +166,12 @@ def calcular():
     generarReportePDF(datos, impacto, sugerencias)
     messagebox.showinfo("Éxito", "Cálculo completado y reporte generado en output/reporte_empresa.pdf")
 
-
 def ejecutar_interfaz():
-    """Interfaz gráfica avanzada con CustomTkinter, incluyendo un desplegable para el transporte."""
+    """
+    Inicia la interfaz gráfica del programa, permitiendo al usuario ingresar los datos y ver los resultados.
+
+    Crea una ventana con campos de entrada para cada dato necesario y un botón para ejecutar el cálculo.
+    """
     global entradas
     ventana = ctk.CTk()
     ventana.title("Calculadora de Impacto Ambiental")
@@ -163,7 +200,6 @@ def ejecutar_interfaz():
 
     ctk.CTkButton(ventana, text="Calcular Impacto", command=calcular).pack(pady=10)
     ventana.mainloop()
-
 
 crearEstructura()
 ejecutar_interfaz()
